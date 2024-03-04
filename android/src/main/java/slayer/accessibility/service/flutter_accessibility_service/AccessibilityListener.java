@@ -4,10 +4,12 @@ import static slayer.accessibility.service.flutter_accessibility_service.Constan
 import static slayer.accessibility.service.flutter_accessibility_service.FlutterAccessibilityServicePlugin.CACHED_TAG;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.GestureDescription;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
@@ -120,6 +122,7 @@ public class AccessibilityListener extends AccessibilityService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         boolean globalAction = intent.getBooleanExtra(INTENT_GLOBAL_ACTION, false);
+        boolean autoClick = intent.getBooleanExtra(INTENT_AUTO_CLICK, false);
         boolean systemActions = intent.getBooleanExtra(INTENT_SYSTEM_GLOBAL_ACTIONS, false);
         if (systemActions && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             List<Integer> actions = getSystemActions().stream().map(AccessibilityNodeInfo.AccessibilityAction::getId).collect(Collectors.toList());
@@ -130,6 +133,11 @@ public class AccessibilityListener extends AccessibilityService {
         if (globalAction) {
             int actionId = intent.getIntExtra(INTENT_GLOBAL_ACTION_ID, 8);
             performGlobalAction(actionId);
+        }
+        if (autoClick && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            int autoClickX = intent.getIntExtra(INTENT_AUTO_CLICK_X, 0);
+            int autoClickY = intent.getIntExtra(INTENT_AUTO_CLICK_Y, 0);
+            autoClick(0, 100, autoClickX, autoClickY);
         }
         Log.d("CMD_STARTED", "onStartCommand: " + startId);
         return START_STICKY;
@@ -197,6 +205,9 @@ public class AccessibilityListener extends AccessibilityService {
         mOverlayView.setFocusable(true);
         mOverlayView.setFocusableInTouchMode(true);
         mOverlayView.setBackgroundColor(Color.TRANSPARENT);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            autoClick(2000, 100, 665, 1194);
+//        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
@@ -219,6 +230,28 @@ public class AccessibilityListener extends AccessibilityService {
             mWindowManager.removeView(mOverlayView);
             isOverlayShown = false;
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void autoClick(int startTimeMs, int durationMs, int x, int y) {
+        boolean isCalled = dispatchGesture(gestureDescription(startTimeMs, durationMs, x, y), null, null);
+        System.out.println(isCalled);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public GestureDescription gestureDescription(int startTimeMs, int durationMs, int x, int y) {
+        Path path = new Path();
+        path.moveTo(x, y);
+        return createGestureDescription(new GestureDescription.StrokeDescription(path, startTimeMs, durationMs));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public GestureDescription createGestureDescription(GestureDescription.StrokeDescription... strokes) {
+        GestureDescription.Builder builder = new GestureDescription.Builder();
+        for (GestureDescription.StrokeDescription stroke : strokes) {
+            builder.addStroke(stroke);
+        }
+        return builder.build();
     }
 
     @Override

@@ -153,4 +153,17 @@ class FlutterAccessibilityService {
       return false;
     }
   }
+
+  static Future<bool> performTap(int x, int y) async {
+    try {
+      return await _methodChannel.invokeMethod<bool?>(
+        'performTap',
+        {"x": x, "y": y},
+      ) ??
+          false;
+    } on PlatformException catch (error) {
+      log("$error");
+      return false;
+    }
+  }
 }

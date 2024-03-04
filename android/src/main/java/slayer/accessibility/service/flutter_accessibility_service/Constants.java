@@ -3,6 +3,9 @@ package slayer.accessibility.service.flutter_accessibility_service;
 public class Constants {
     public static String ACCESSIBILITY_INTENT = "accessibility_event";
     public static final String INTENT_GLOBAL_ACTION = "performGlobal";
+    public static final String INTENT_AUTO_CLICK = "autoClick";
+    public static final String INTENT_AUTO_CLICK_X = "autoClickX";
+    public static final String INTENT_AUTO_CLICK_Y = "autoClickY";
     public static final String INTENT_GLOBAL_ACTION_ID = "actionId";
     public static final String INTENT_SYSTEM_GLOBAL_ACTIONS = "globalSystemAction";
     public static final String BROD_SYSTEM_GLOBAL_ACTIONS = "globalSystemActionBrod";

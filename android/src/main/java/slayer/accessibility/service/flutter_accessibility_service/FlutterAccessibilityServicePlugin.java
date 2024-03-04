@@ -104,6 +104,19 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
             } else {
                 result.success(false);
             }
+        } else if (call.method.equals("performTap")) {
+            Integer x = call.argument("x");
+            Integer y = call.argument("y");
+            if (Utils.isAccessibilitySettingsOn(context)) {
+                final Intent i = new Intent(context, AccessibilityListener.class);
+                i.putExtra(INTENT_AUTO_CLICK, true);
+                i.putExtra(INTENT_AUTO_CLICK_X, x);
+                i.putExtra(INTENT_AUTO_CLICK_Y, y);
+                context.startService(i);
+                result.success(true);
+            } else {
+                result.success(false);
+            }
         } else if (call.method.equals("performActionById")) {
             String nodeId = call.argument("nodeId");
             Integer action = (Integer) call.argument("nodeAction");
